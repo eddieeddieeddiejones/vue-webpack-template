@@ -161,3 +161,115 @@ module.exports = {
 ```
 
 命令行执行`webpack`命令，dist文件夹下生成了`main.css`文件，浏览器打开`index.html`文件得文字居中的"hello webpack"
+
+### 热更新
+
+```shell
+npm i -D webpack-cli
+npm i -d html-webpack-plugin clean-webpack-plugin webpack-dev-server
+```
+
+更改`package.json`文件的script字段
+
+```json
+"scripts": {
+  "start": "webpack-dev-server --mode development --open"
+},
+```
+
+`webapck.config.js`文件改动非常多
+
+```js
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+module.exports = {
+  // JavaScript 执行入口文件
+  entry: {
+    app: './src/index.js',
+  },
+  devtool: 'inline-source-map',
+  devServer: {
+    contentBase: './',
+    hot: true,
+  },
+  output: {
+    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          // {
+          //   loader: MiniCssExtractPlugin.loader,
+          //   options: {
+          //     // you can specify a publicPath here
+          //     // by default it uses publicPath in webpackOptions.output
+          //     publicPath: '../',
+          //     hmr: process.env.NODE_ENV === 'development',
+          //   },
+          // },
+          'css-loader',
+        ],
+      },
+    ],
+  },
+  // 打包的时候抽离css，使之成为单独文件
+  plugins: [
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // all options are optional
+      filename: '[name].css',
+      chunkFilename: '[id].css',
+      ignoreOrder: false, // Enable to remove warnings about conflicting order
+    }),
+    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      title: 'Hot Module Replacement',
+    }),
+  ]
+};
+```
+
+根目录下新建src文件夹
+在src文件夹下，新建 `index.js`
+```js
+// index.js
+// 通过 CommonJS 规范导入 CSS 模块
+require('./main.css');
+// 通过 CommonJS 规范导入 show 函数
+const show = require('./show.js');
+// 执行 show 函数
+show('Webpack hot reload');
+console.log(12222)
+```
+
+在src文件夹下，新建 `show.js`
+
+```js
+// show.js
+// 操作 DOM 元素，把 content 显示到网页上
+function show(content) {
+  window.document.body.innerText = 'Hello,' + content;
+}
+
+// 通过 CommonJS 规范导出 show 函数
+module.exports = show;
+```
+
+在src文件夹下，新建 `main.css`
+```css
+/* main.css */
+body {
+  text-align: center;
+  background-color: green;
+}
+```
+
+执行命令`npm start`，会自动浏览器打开`http://localhost:8080/`，更改src下文件，浏览器会刷新显示最新内容。
+
