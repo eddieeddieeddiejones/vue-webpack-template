@@ -54,17 +54,55 @@ show('Webpack');
 
 命令行执行`webpack`命令，浏览器打开`index.html`文件得"hello webpack"
 
-```shell
+### 处理css
+main.js
+```js
+// 通过 CommonJS 规范导入 CSS 模块
+require('./main.css');
+// 通过 CommonJS 规范导入 show 函数
+const show = require('./show.js');
+// 执行 show 函数
+show('Webpack');
+```
+
+新建`main.css`
+```css
+#app{
+  text-align: center;
+}
+```
+
+webpack.config.js
+
+```js
+const path = require('path');
+
+module.exports = {
+  // JavaScript 执行入口文件
+  entry: './main.js',
+  output: {
+    // 把所有依赖的模块合并输出到一个 bundle.js 文件
+    filename: 'bundle.js',
+    // 输出文件都放到 dist 目录下
+    path: path.resolve(__dirname, './dist'),
+  },
+  module: {
+    rules: [
+      {
+        // 用正则去匹配要用该 loader 转换的 CSS 文件
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader?minimize'],
+      }
+    ]
+  }
+};
 ```
 
 ```shell
+npm i -D style-loader css-loader
 ```
 
-```shell
-```
-
-```shell
-```
+命令行执行`webpack`命令，浏览器打开`index.html`文件得文字居中的"hello webpack"
 
 ```shell
 ```
