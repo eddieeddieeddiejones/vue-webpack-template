@@ -1,4 +1,5 @@
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   // JavaScript 执行入口文件
@@ -12,10 +13,28 @@ module.exports = {
   module: {
     rules: [
       {
-        // 用正则去匹配要用该 loader 转换的 CSS 文件
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      }
-    ]
-  }
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              // you can specify a publicPath here
+              // by default it uses publicPath in webpackOptions.output
+              publicPath: '../',
+              hmr: process.env.NODE_ENV === 'development',
+            },
+          },
+          'css-loader',
+        ],
+      },
+    ],
+  },
+  // 打包的时候抽离css，使之成为单独文件
+  plugins: [new MiniCssExtractPlugin({
+    // Options similar to the same options in webpackOptions.output
+    // all options are optional
+    filename: '[name].css',
+    chunkFilename: '[id].css',
+    ignoreOrder: false, // Enable to remove warnings about conflicting order
+  }),]
 };

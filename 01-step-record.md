@@ -104,16 +104,60 @@ npm i -D style-loader css-loader
 
 命令行执行`webpack`命令，浏览器打开`index.html`文件得文字居中的"hello webpack"
 
-```shell
-```
+### 打包的时候，抽离css文件
 
 ```shell
+npm install --save-dev mini-css-extract-plugin
 ```
 
-要求
-- 开发、测试、线上环境
-- ts、scss
-- 图片，静态文件
-性能优化方面
-- 懒加载
-- 服务端渲染ssr（必须）
+webpack.config.js
+
+```js
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+module.exports = {
+  // JavaScript 执行入口文件
+  entry: './main.js',
+  output: {
+    // 把所有依赖的模块合并输出到一个 bundle.js 文件
+    filename: 'bundle.js',
+    // 输出文件都放到 dist 目录下
+    path: path.resolve(__dirname, './dist'),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              // you can specify a publicPath here
+              // by default it uses publicPath in webpackOptions.output
+              publicPath: '../',
+              hmr: process.env.NODE_ENV === 'development',
+            },
+          },
+          'css-loader',
+        ],
+      },
+    ],
+  },
+  // 打包的时候抽离css，使之成为单独文件
+  plugins: [new MiniCssExtractPlugin({
+    // Options similar to the same options in webpackOptions.output
+    // all options are optional
+    filename: '[name].css',
+    chunkFilename: '[id].css',
+    ignoreOrder: false, // Enable to remove warnings about conflicting order
+  }),]
+};
+```
+
+更改index.html，添加对css文件的引用
+```html
+<link rel="stylesheet" href="./dist/main.css">
+```
+
+命令行执行`webpack`命令，dist文件夹下生成了`main.css`文件，浏览器打开`index.html`文件得文字居中的"hello webpack"
