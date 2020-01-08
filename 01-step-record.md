@@ -273,3 +273,115 @@ body {
 
 执行命令`npm start`，会自动浏览器打开`http://localhost:8080/`，更改src下文件，浏览器会刷新显示最新内容。
 
+### support typescript
+
+new `tsconfig.json`
+
+```json
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es5",
+    "jsx": "react",
+    "allowJs": true
+  }
+}
+```
+
+```shell
+npm install --save-dev typescript ts-loader
+```
+
+webpack.config.js
+
+```js
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+module.exports = {
+  // JavaScript 执行入口文件
+  entry: {
+    app: './src/index.ts',
+  },
+  devtool: 'inline-source-map',
+  devServer: {
+    contentBase: './',
+    hot: true,
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+  },
+  output: {
+    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          // {
+          //   loader: MiniCssExtractPlugin.loader,
+          //   options: {
+          //     // you can specify a publicPath here
+          //     // by default it uses publicPath in webpackOptions.output
+          //     publicPath: '../',
+          //     hmr: process.env.NODE_ENV === 'development',
+          //   },
+          // },
+          'css-loader',
+        ],
+      },
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  // 打包的时候抽离css，使之成为单独文件
+  plugins: [
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // all options are optional
+      filename: '[name].css',
+      chunkFilename: '[id].css',
+      ignoreOrder: false, // Enable to remove warnings about conflicting order
+    }),
+    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      title: 'Hot Module Replacement',
+    }),
+  ]
+};
+```
+
+index.ts
+
+```ts
+// 通过 CommonJS 规范导入 CSS 模块
+require('./main.css');
+// 通过 CommonJS 规范导入 show 函数
+const showHello = require('./show.ts');
+// 执行 show 函数
+showHello('Webpack hot reload');
+console.log(22)
+```
+
+show.ts
+
+```ts
+// 操作 DOM 元素，把 content 显示到网页上
+function show(content: string) {
+  window.document.body.innerText = 'Hello,' + content;
+}
+
+// 通过 CommonJS 规范导出 show 函数
+module.exports = show;
+```

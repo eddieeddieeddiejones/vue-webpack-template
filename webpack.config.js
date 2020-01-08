@@ -6,12 +6,15 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
   // JavaScript 执行入口文件
   entry: {
-    app: './src/index.js',
+    app: './src/index.ts',
   },
   devtool: 'inline-source-map',
   devServer: {
     contentBase: './',
     hot: true,
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
     filename: '[name].bundle.js',
@@ -34,6 +37,11 @@ module.exports = {
           // },
           'css-loader',
         ],
+      },
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
     ],
   },

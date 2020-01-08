@@ -1,5 +1,5 @@
 // 操作 DOM 元素，把 content 显示到网页上
-function show(content) {
+function show(content: string) {
   window.document.body.innerText = 'Hello,' + content;
 }
 
