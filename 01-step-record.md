@@ -385,3 +385,49 @@ function show(content: string) {
 // 通过 CommonJS 规范导出 show 函数
 module.exports = show;
 ```
+
+### import scss
+
+```shell
+npm install sass-loader node-sass --save-dev
+```
+
+index.ts
+
+```ts
+import './style.scss';
+...
+```
+
+style.scss
+
+```scss
+$body-color: red;
+
+body {
+  color: $body-color;
+}
+```
+
+webpack.config.js
+
+```js
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          'style-loader',
+          // Translates CSS into CommonJS
+          'css-loader',
+          // Compiles Sass to CSS
+          'sass-loader',
+        ],
+      },
+    ],
+  },
+  ...
+};
+```
